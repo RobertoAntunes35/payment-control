@@ -1,0 +1,7 @@
+
+STATUS_PAGAMENTO = {
+    'A VENCER':1,
+    'VENCIDO':2,
+    'PROTESTADO':3,
+    'PAGO':4
+}

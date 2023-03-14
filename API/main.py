@@ -3,15 +3,19 @@ import numpy as np
 import sys 
 import os 
 from datetime import datetime
+from collections import namedtuple
+
+from configs import STATUS_PAGAMENTO
 
 class Debito:
-    def __init__(self, valor:float, data_emissao:str, data_vencimento:str, fornecedor:str, pedido:str) -> None:
+    def __init__(self, valor:float, data_emissao:str, data_vencimento:str, fornecedor:str, pedido:str, status = "A VENCER") -> None:
         self._valor = valor 
         self._data_emissao = data_emissao
         self._data_vencimento = data_vencimento
         self._fornecedor = fornecedor
         self._pedido = pedido
         self.FMT = '%d/%m/%Y'
+        self._status = status
 
     # Getters
     def get_valor(self):
@@ -37,6 +41,10 @@ class Debito:
     def get_pedido(self):
         return self._pedido
 
+    def get_status(self):
+        return self._status
+    # 
+    
     # Setters
     def set_valor(self, novo_valor):
         if novo_valor < 0:
@@ -69,20 +77,29 @@ class Debito:
             raise SyntaxError("Defina valores para o novo pedido.")
         self._pedido = novo_valor
 
+    def set_status(self, novo_valor):
+        if novo_valor not in STATUS_PAGAMENTO.keys():
+            raise KeyError("Se atente aos status de pagamento disponiveis.")
+        self._status = novo_valor
+    #
 
 class Cheque(Debito):
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, banco:str, numero_cheque:str) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
         self._numero_cheque = numero_cheque
         self._banco = banco 
-
+        self.tipo = "CHEQUE"
+    class Meta:
+        tipo = "CHEQUE"
+        
     # Getters
     def get_numero_cheque(self):
         return self._numero_cheque
     
     def get_banco(self):
         return self._banco
-    
+    # 
+
     # Setters
     def set_numero_cheque(self, novo_valor):
         if novo_valor is None:
@@ -93,7 +110,7 @@ class Cheque(Debito):
         if novo_valor is None:
             raise SyntaxError("Defina valores para o numero do banco.")
         self._banco = novo_valor
-
+    
 class Boleto(Debito):
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, numero_boleto: int, protesto: bool, dias_protesto: int, parcelas = None) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
@@ -101,6 +118,10 @@ class Boleto(Debito):
         self._protesto = protesto
         self._dias_protesto = dias_protesto
         self._parcelas = parcelas
+
+    class Meta:
+        tipo = "BOLETO"
+
     # Getters
     def get_numero_boleto(self):
         return self._numero_boleto
@@ -141,13 +162,19 @@ class Boleto(Debito):
 class Dinheiro(Debito):
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
+    
+    class Meta:
+        tipo = "DINHEIRO"
 
 class CartaoCredito(Debito):
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, parcelas: int, fechamento_fatura: str) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
         self._parcelas = parcelas
         self._fechamento_fatura = fechamento_fatura
-    
+
+    class Meta:
+        tipo = "CARTAO DE CREDITO"
+
     # Getters
     def get_parcelas(self):
         return self._parcelas
@@ -172,11 +199,28 @@ class CartaoCredito(Debito):
         except SyntaxError as error:
             print(f'Erro apresentado: {error}')
 
-class Contas(Debito):
-    def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str) -> None:
-        super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
+class ContaEmpresa:
+    def __init__(self):
+        self._banco_informacoes = []
+    
+    def get_banco_informacoes(self):
+        return self._banco_informacoes
+
+    def inclusao_titulo(self):
+        pass     
+    def exclusao_titulo(self):
+        pass
+    def alteracao_titulo(self):
+        pass 
+    def pagamento_titulo(self):
+        pass 
+    def consulta_titulo(self):
+        pass
 
     
+
+
+
 if __name__ == '__main__':
     conta_cheque = Cheque(
         valor=1500.00,
@@ -191,15 +235,16 @@ if __name__ == '__main__':
         valor=1500.00,
         data_emissao='13/03/2023',
         data_vencimento='13/04/2023',
-        fornecedor='BELLPAR',
+        fornecedor='REFRIX',
         pedido='123ABC',
         dias_protesto=5,
         numero_boleto=123,
         protesto=True
     )
 
-    print(type(conta_boleto.get_data_emissao()))
-    print(conta_boleto.set_data_vencimento('14/03/2022'))
+    ContaMon = ContaEmpresa()
+    ContaMon.inclusao_titulo()
+    
 
     
 
