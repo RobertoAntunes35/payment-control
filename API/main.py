@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from collections import namedtuple
 
+from collections import UserDict, UserList
+
 from configs import STATUS_PAGAMENTO
 
 class Debito:
@@ -16,6 +18,14 @@ class Debito:
         self._pedido = pedido
         self.FMT = '%d/%m/%Y'
         self._status = status
+        
+
+    def __str__(self) -> str:
+        return 'Valor do Título: %s \
+                \nData Vencimento: %s\
+                \nFornecedor: %s \
+                \nNúmero Pedido: %s ' \
+        % (self._valor, self._data_vencimento, self._fornecedor, self._pedido)
 
     # Getters
     def get_valor(self):
@@ -43,8 +53,7 @@ class Debito:
 
     def get_status(self):
         return self._status
-    # 
-    
+     
     # Setters
     def set_valor(self, novo_valor):
         if novo_valor < 0:
@@ -88,10 +97,9 @@ class Cheque(Debito):
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido)
         self._numero_cheque = numero_cheque
         self._banco = banco 
-        self.tipo = "CHEQUE"
     class Meta:
         tipo = "CHEQUE"
-        
+
     # Getters
     def get_numero_cheque(self):
         return self._numero_cheque
@@ -200,26 +208,10 @@ class CartaoCredito(Debito):
             print(f'Erro apresentado: {error}')
 
 class ContaEmpresa:
-    def __init__(self):
-        self._banco_informacoes = []
-    
-    def get_banco_informacoes(self):
-        return self._banco_informacoes
 
-    def inclusao_titulo(self):
-        pass     
-    def exclusao_titulo(self):
+    def __init__(self) -> None:
         pass
-    def alteracao_titulo(self):
-        pass 
-    def pagamento_titulo(self):
-        pass 
-    def consulta_titulo(self):
-        pass
-
     
-
-
 
 if __name__ == '__main__':
     conta_cheque = Cheque(
@@ -242,11 +234,11 @@ if __name__ == '__main__':
         protesto=True
     )
 
-    ContaMon = ContaEmpresa()
-    ContaMon.inclusao_titulo()
-    
 
-    
+    Contas = ContaEmpresa()
+    Contas['FirstDebito'] = conta_boleto
+    print(Contas['FirstDebito'])    
+
 
 
 
