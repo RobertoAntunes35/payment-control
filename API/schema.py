@@ -1,12 +1,13 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, Float, String, Boolean, Date
 
+
 Base = declarative_base()
 
 class Boleto(Base):
     __tablename__ = 'boleto'
 
-    idBoleto = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     valor = Column(Float, nullable = False)
     dataEmissao = Column(Date, nullable = False)
     dataPagamento = Column(Date, nullable = False)
@@ -19,13 +20,16 @@ class Boleto(Base):
     protesto = Column(Boolean, nullable = False)
     parcela = Column(Integer, nullable = True)
 
+    def __str__(self) -> str:
+        return f'<Boleto: {self.numeroBoleto} \nValor: {self.valor} \nData Vencimento: {self.dataVencimento} \nStatus: {self.statusPagamento}>'
+
     class Meta:
         pass
 
 class Cheque(Base):
     __tablename__ = 'cheque'
 
-    idBoleto = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     valor = Column(Float, nullable = False)
     dataEmissao = Column(Date, nullable = False)
     dataPagamento = Column(Date, nullable = False)
@@ -43,7 +47,7 @@ class Cheque(Base):
 class Dinheiro(Base):
     __tablename__ = 'dinheiro'
 
-    idBoleto = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     valor = Column(Float, nullable = False)
     dataEmissao = Column(Date, nullable = False)
     dataPagamento = Column(Date, nullable = False)
@@ -58,7 +62,7 @@ class Dinheiro(Base):
 class CartaoCredito(Base):
     __tablename__ = 'cartaocredito'
 
-    idBoleto = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     valor = Column(Float, nullable = False)
     dataEmissao = Column(Date, nullable = False)
     dataPagamento = Column(Date, nullable = False)
@@ -75,11 +79,7 @@ class BancoConta(Base):
 
     idContas = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     tipo = Column(String(40), nullable = False)
-    idCheque = Column(Integer, nullable = False)
-    idBoleto = Column(Integer, nullable = False)
-    idDinheiro = Column(Integer, nullable = False)
-    idPix = Column(Integer, nullable = False)
-    idCartao = Column(Integer, nullable = False)
+    idTitulos = Column(Integer, nullable = False)
 
     class Meta:
         pass

@@ -104,8 +104,11 @@ class Cheque(Debito):
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido, status)
         self._numero_cheque = numero_cheque
         self._banco = banco 
-    class Meta:
-        tipo = "CHEQUE"
+        self._tipo = "BOLETO"
+
+    @property
+    def tipo(self):
+        return self._tipo
 
     # Getters
     def get_numero_cheque(self):
@@ -130,16 +133,20 @@ class Cheque(Debito):
         self._banco = novo_valor
     
 class Boleto(Debito):
+
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, numero_boleto: int, protesto: bool, dias_protesto: int, status=None ,parcelas = None) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido, status)
         self._numero_boleto = numero_boleto
         self._protesto = protesto
         self._dias_protesto = dias_protesto
         self._parcelas = parcelas
+        self._tipo = "BOLETO"
 
-    class Meta:
-        tipo = "BOLETO"
-
+    @property
+    def tipo(self):
+        return self._tipo
+    
+     
     # Getters
     def get_numero_boleto(self):
         return self._numero_boleto
@@ -177,21 +184,30 @@ class Boleto(Debito):
             raise TypeError("Digite um número inteiro para a alteração das parcelas.")
         self._parcelas = novo_valor
 
+
 class Dinheiro(Debito):
+    tipo = "DINHEIRO"
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, status = None) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido, status)
-    
-    class Meta:
-        tipo = "DINHEIRO"
+        self._tipo = "CHEQUE"
+
+    @property
+    def tipo(self):
+        return self._tipo
+
 
 class CartaoCredito(Debito):
+    tipo = "CARTAO DE CREDITO"
     def __init__(self, valor: float, data_emissao: str, data_vencimento: str, fornecedor: str, pedido: str, parcelas: int, fechamento_fatura: str, status = None) -> None:
         super().__init__(valor, data_emissao, data_vencimento, fornecedor, pedido, status)
         self._parcelas = parcelas
         self._fechamento_fatura = fechamento_fatura
 
-    class Meta:
-        tipo = "CARTAO DE CREDITO"
+        self._tipo = "CARTAO DE CREDITO"
+
+    @property
+    def tipo(self):
+        return self._tipo
 
     # Getters
     def get_parcelas(self):
@@ -220,25 +236,56 @@ class CartaoCredito(Debito):
             print(f'Erro apresentado: {error}')
 
 class ContaEmpresa:
-
-    def __init__(self) -> None:
-        pass
-    def __str__(self) -> str:
-        pass
-
-    def drop_titulos(self):
-        pass 
-    def add_titulos(self):
-        pass 
-    def alterar_titulos(self):
-        pass 
-    def pagar_titulos(self):
-        pass 
+    def __init__(self, controlador_bd, schema) -> None:
+        self._controlador_bd = controlador_bd
+        self._schema = schema
     
+    def __str__(self) -> str:
+        pass 
+
+    def add_titulos(self, classTitulo, bdTitulo):
+        consulta_titulos = self._controlador_bd.query(self._schema).filter(self._schema.idTitulos == bdTitulo.id).all()
+        if consulta_titulos:
+            print('O título já existe na base de dados.')
+        else:
+            add_titulo = self._schema(
+                tipo = classTitulo.tipo,
+                idTitulos = bdTitulo.id
+            )
+            self._controlador_bd.add(add_titulo)
+            self._controlador_bd.commit()
+            self._controlador_bd.close()
+        
+    def add_boleto(self, dados_boleto):
+        novo_boleto =  sch.Boleto(
+        valor = dados_boleto.get_valor(),
+        dataEmissao = dados_boleto.get_data_emissao(),
+        dataPagamento = dados_boleto.get_data_emissao(),
+        dataVencimento = dados_boleto.get_data_vencimento(),
+        fornecedor = dados_boleto.get_fornecedor(),
+        pedido = dados_boleto.get_pedido(),
+        statusPagamento = dados_boleto.get_status(),
+        numeroBoleto = dados_boleto.get_numero_boleto(),
+        protesto = dados_boleto.get_protesto()
+    )
+        self._controlador_bd.add(novo_boleto)
+        self._controlador_bd.commit()
+        self.add_titulos(dados_boleto, novo_boleto)
+    def add_cheque(self, dados_cheque):
+        pass 
+    def add_dinheiro(self, dados_dinheiro):
+        pass 
+    def add_cartao(self, dados_cartao):
+        pass 
+    def alter_titulos(self):
+        pass 
+    def pay_titulos(self):
+        pass 
+
 
 if __name__ == '__main__':
     
-    conta_boleto = Boleto(
+    titulo_boleto = Boleto(
         valor=1500.00,
         data_emissao='13/03/2023',
         data_vencimento='13/04/2023',
@@ -250,32 +297,13 @@ if __name__ == '__main__':
         status="A VENCER"
     )
 
-    print((conta_boleto.get_data_emissao()))
-    print((conta_boleto.get_data_vencimento()))
-    print((conta_boleto.get_fornecedor()))
-    print((conta_boleto.get_pedido()))
-    print((conta_boleto.get_dias_protesto()))
-    print((conta_boleto.get_numero_boleto()))
-    print((conta_boleto.get_protesto()))
-    print((conta_boleto.get_status()))
-
-    novo_boleto =  sch.Cheque(
-        valor = conta_boleto.get_valor(),
-        dataEmissao = conta_boleto.get_data_emissao(),
-        dataPagamento = conta_boleto.get_data_emissao(),
-        dataVencimento = conta_boleto.get_data_vencimento(),
-        fornecedor = conta_boleto.get_fornecedor(),
-        pedido = conta_boleto.get_pedido(),
-        statusPagamento = conta_boleto.get_status(),
-
-        numeroBoleto = conta_boleto.get_numero_boleto(),
-        protesto = conta_boleto.get_protesto()
-    )
-
     Session = sessionmaker(bind = engine)
     session = Session()
+    ContaMon = ContaEmpresa(session, sch.BancoConta)
+    
 
-    session.close()
+    
+    
 
 
 
